@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>فرشاة الألوان ثلاثية الأبعاد</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #1a1a3d, #2e2e5e);
+            color: #fff;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none; /* Prevents canvas from blocking interactions */
+        }
+        .section {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0; /* For GSAP animation */
+        }
+        .section h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            margin-bottom: 20px;
+        }
+        .section p {
+            font-size: 1.3rem;
+            max-width: 700px;
+            opacity: 0.9;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #ff55ff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 85, 255, 0.5);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .section h1 {
+                font-size: 2.2rem;
+            }
+            .section p {
+                font-size: 1rem;
+                max-width: 90%;
+            }
+            .cta-button {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .section h1 {
+                font-size: 1.8rem;
+            }
+            .section p {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <canvas id="three-canvas"></canvas>
+    <div class="section" id="intro">
+        <h1>عالم الألوان التفاعلي</h1>
+        <p>استمتع بتجربة ثلاثية الأبعاد مبهرة مع تأثيرات تمرير سلسة وفرشاة ألوان تفاعلية.</p>
+        <a href="#explore" class="cta-button">اكتشف الآن</a>
+    </div>
+    <div class="section" id="brush">
+        <h1>فرشاة الألوان</h1>
+        <p>حرك الماوس أو المس الشاشة لخلق أشكال ملونة تتحرك مع التمرير!</p>
+    </div>
+    <div class="section" id="explore">
+        <h1>تجربة مذهلة</h1>
+        <p>تصميم متجاوب ومُحسّن ليعمل بسلاسة على جميع الأجهزة مع تأثيرات بصرية فريدة.</p>
+        <a href="#intro" class="cta-button">العودة للأعلى</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script>
+        // Three.js Setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        camera.position.z = 5;
+
+        // 3D Text
+        const loader = new THREE.FontLoader();
+        loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', (font) => {
+            const textGeometry = new THREE.TextGeometry('الألوان', {
+                font: font,
+                size: 0.6,
+                height: 0.1,
+                curveSegments: 12,
+                bevelEnabled: true,
+                bevelThickness: 0.03,
+                bevelSize: 0.02,
+                bevelOffset: 0,
+                bevelSegments: 5
+            });
+            const textMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xff55ff, 
+                emissive: 0x550055,
+                shininess: 100
+            });
+            const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+            textMesh.position.set(-2.5, 1, 0);
+            scene.add(textMesh);
+
+            // Animate 3D Text with GSAP
+            gsap.to(textMesh.rotation, {
+                y: Math.PI * 2,
+                duration: 10,
+                repeat: -1,
+                ease: "none"
+            });
+        });
+
+        // Lighting
+        const light = new THREE.PointLight(0xffffff, 1.5, 100);
+        light.position.set(10, 10, 10);
+        scene.add(light);
+        const ambientLight = new THREE.AmbientLight(0x606060, 0.5);
+        scene.add(ambientLight);
+
+        // Particle System for Brush Effect
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 500; // Reduced for better mobile performance
+        const posArray = new Float32Array(particlesCount * 3);
+        const colorsArray = new Float32Array(particlesCount * 3);
+        const velocities = new Float32Array(particlesCount * 3);
+        for (let i = 0; i < particlesCount * 3; i += 3) {
+            posArray[i] = (Math.random() - 0.5) * 10;
+            posArray[i + 1] = (Math.random() - 0.5) * 10;
+            posArray[i + 2] = (Math.random() - 0.5) * 10;
+            colorsArray[i] = Math.random();
+            colorsArray[i + 1] = Math.random();
+            colorsArray[i + 2] = Math.random();
+            velocities[i] = (Math.random() - 0.5) * 0.02;
+            velocities[i + 1] = (Math.random() - 0.5) * 0.02;
+            velocities[i + 2] = (Math.random() - 0.5) * 0.02;
+        }
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3));
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.06,
+            vertexColors: true,
+            blending: THREE.AdditiveBlending,
+            transparent: true
+        });
+        const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particles);
+
+        // Mouse and Touch Interaction
+        let mouseX = 0, mouseY = 0;
+        const handleMove = (event) => {
+            const clientX = event.clientX || (event.touches && event.touches[0].clientX);
+            const clientY = event.clientY || (event.touches && event.touches[0].clientY);
+            mouseX = (clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(clientY / window.innerHeight) * 2 + 1;
+        };
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('touchmove', handleMove);
+
+        // GSAP ScrollTrigger Animations
+        gsap.registerPlugin(ScrollTrigger);
+        gsap.utils.toArray('.section').forEach((section, i) => {
+            gsap.fromTo(section, 
+                {
+                    opacity: 0,
+                    y: 150,
+                    scale: 0.9
+                },
+                {
+                    scrollTrigger: {
+                        trigger: section,
+                        start: 'top 90%',
+                        end: 'top 30%',
+                        scrub: 1,
+                        toggleActions: 'play none none reverse'
+                    },
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    duration: 1.5,
+                    ease: 'power3.out'
+                }
+            );
+
+            // Animate particles based on scroll
+            gsap.to(particles.rotation, {
+                scrollTrigger: {
+                    trigger: section,
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: true
+                },
+                x: i * 0.5,
+                y: i * 0.3,
+                duration: 2
+            });
+        });
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            const positions = particlesGeometry.attributes.position.array;
+            for (let i = 0; i < particlesCount * 3; i += 3) {
+                positions[i] += velocities[i] + mouseX * 0.01;
+                positions[i + 1] += velocities[i + 1] + mouseY * 0.01;
+                positions[i + 2] += velocities[i + 2];
+                // Reset particles if they go too far
+                if (Math.abs(positions[i]) > 10 || Math.abs(positions[i + 1]) > 10) {
+                    positions[i] = (Math.random() - 0.5) * 10;
+                    positions[i + 1] = (Math.random() - 0.5) * 10;
+                    positions[i + 2] = (Math.random() - 0.5) * 10;
+                }
+            }
+            particlesGeometry.attributes.position.needsUpdate = true;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Responsive Handling
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        });
+
+        // Optimize for Mobile
+        if (/Mobi|Android/i.test(navigator.userAgent)) {
+            particlesMaterial.size = 0.08; // Slightly larger particles for touch devices
+        }
+    </script>
+</body>
+</html>
